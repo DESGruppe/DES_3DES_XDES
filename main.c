@@ -6,7 +6,7 @@
 
 /* 
  * File:   main.c
- * Author: nusser
+ * Author: des_gruppe
  *
  * Created on 02. Jänner 2016, 16:41
  */
