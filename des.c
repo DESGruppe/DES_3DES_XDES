@@ -68,6 +68,7 @@ int PC2[] =    {14, 17, 11, 24,  1,  5,
 
 //Anzahl der left-shifts pro Runde
 int left_shifts[] = {-1, 1, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1};
+
 //Initial Permutation
 int IP[] = {58, 50, 42, 34, 26, 18, 10, 2,
 			60, 52, 44, 36, 28, 20, 12, 4,
@@ -77,6 +78,7 @@ int IP[] = {58, 50, 42, 34, 26, 18, 10, 2,
 			59, 51, 43, 35, 27, 19, 11, 3,
 			61, 53, 45, 37, 29, 21, 13, 5,
 			63, 55, 47, 39, 31, 23, 15, 7};
+
 //Last Permutation = Inverses von IP
 int LP[] = {40,  8, 48, 16, 56, 24, 64, 32,
 			39,  7, 47, 15, 55, 23, 63, 31,
@@ -105,12 +107,15 @@ int P[] =    {16,  7, 20, 21,
 			  19, 13, 30,  6,
 			  22, 11,  4, 25};
 
+//Hier kommt der Aufruf des PRNG vom ANSI was weiß ich Standard.
 void generate_key(unsigned char* key){
 	int i;
 	for (i=0; i<8; i++) {
 		key[i] = rand()%255;
 	}
 }
+
+//PRNG
 void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 	int i, j;
 	int shift_size;
@@ -120,30 +125,40 @@ void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 		key_sets[0].k[i] = 0;
 	}
 
+	//Initial Permutation (siehe DES-Netzwerk)
 	for (i=0; i<56; i++) {
 		shift_size = PC1[i];
+		//Nach jedem 8 Bit wird es um 1 nach Rechts geshiftet.
 		shift_byte = 0x80 >> ((shift_size - 1)%8);
+		//UND-Verknuepfung mit den Stellen 7 bis 0.
 		shift_byte &= main_key[(shift_size - 1)/8];
+		//Wird wieder zurueck geshiftet.
 		shift_byte <<= ((shift_size - 1)%8);
-
+		//Ersten 8 Durchgänge werden in k[0] gespeichert, Durchgang 9-16 in k[1].
 		key_sets[0].k[i/8] |= (shift_byte >> i%8);
 	}
 
+	//Ersten 3 Werte von k werden in c abgespeichert.
 	for (i=0; i<3; i++) {
 		key_sets[0].c[i] = key_sets[0].k[i];
 	}
 
+	//Die oberen 4 Bits vom 4. Wert/Index 3 werden zu c dazu genommen.
 	key_sets[0].c[3] = key_sets[0].k[3] & 0xF0;
 
+
 	for (i=0; i<3; i++) {
+		//Nimmt die letzte 4 Bits von dem Wert aus k[i+3] und shiftet diese um 4 nach links.
 		key_sets[0].d[i] = (key_sets[0].k[i+3] & 0x0F) << 4;
+		//Nimmt die ersten 4 Bits von dem Wert aus k[i+4] und ODER-Verknuepft diese mit den Ergebnis aus Zeile darüber.
 		key_sets[0].d[i] |= (key_sets[0].k[i+4] & 0xF0) >> 4;
 	}
-
+	//Die unteren 4 Bits vom 7. Wert werden zu d dazu genommen.
 	key_sets[0].d[3] = (key_sets[0].k[6] & 0x0F) << 4;
 
 
 	for (i=1; i<17; i++) {
+		//In allen key_sets Felder werden die gleichen Werte abgespeichert. (c und d bleiben gleich)
 		for (j=0; j<4; j++) {
 			key_sets[i].c[j] = key_sets[i-1].c[j];
 			key_sets[i].d[j] = key_sets[i-1].d[j];
@@ -156,12 +171,14 @@ void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 			shift_byte = 0xC0;
 		}
 
-		// Process C
+		// Verarbeitung vom C-Array
 		first_shift_bits = shift_byte & key_sets[i].c[0];
 		second_shift_bits = shift_byte & key_sets[i].c[1];
 		third_shift_bits = shift_byte & key_sets[i].c[2];
 		fourth_shift_bits = shift_byte & key_sets[i].c[3];
 
+		//Beim ersten Durchgang wird nichts verändert und ab dem 2. Durchgang:
+		//Wird das höchste Bit von c verworfen und das niedrigste Bit von c ersetzt.
 		key_sets[i].c[0] <<= shift_size;
 		key_sets[i].c[0] |= (second_shift_bits >> (8 - shift_size));
 
@@ -174,7 +191,7 @@ void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 		key_sets[i].c[3] <<= shift_size;
 		key_sets[i].c[3] |= (first_shift_bits >> (4 - shift_size));
 
-		// Process D
+		// Verarbeitung vom D-Array, sehe Verarbeitung von C
 		first_shift_bits = shift_byte & key_sets[i].d[0];
 		second_shift_bits = shift_byte & key_sets[i].d[1];
 		third_shift_bits = shift_byte & key_sets[i].d[2];
@@ -194,6 +211,7 @@ void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 
 		for (j=0; j<48; j++) {
 			shift_size = PC2[j];
+			//siehe  Initial Permutation-Beschreibung
 			if (shift_size <= 28) {
 				shift_byte = 0x80 >> ((shift_size - 1)%8);
 				shift_byte &= key_sets[i].c[(shift_size - 1)/8];
@@ -208,6 +226,7 @@ void generate_sub_keys(unsigned char* main_key, key_set* key_sets){
 		}
 	}
 }
+//DES oooooooh yeeeeeeaaaaaaaah!!!!!
 void process_message(unsigned char* message_piece, unsigned char* processed_piece, key_set* key_sets, int mode){
 	int i, k;
 	int shift_size;
@@ -217,6 +236,7 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 	memset(initial_permutation, 0, 8);
 	memset(processed_piece, 0, 8);
 
+	//siehe Initial-Permutation von PRNG
 	for (i=0; i<64; i++) {
 		shift_size = IP[i];
 		shift_byte = 0x80 >> ((shift_size - 1)%8);
@@ -226,6 +246,7 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 		initial_permutation[i/8] |= (shift_byte >> i%8);
 	}
 
+	//Aufteilen in linke und rechte Hälfte
 	unsigned char l[4], r[4];
 	for (i=0; i<4; i++) {
 		l[i] = initial_permutation[i];
@@ -236,10 +257,13 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 
 	int key_index;
 	for (k=1; k<=16; k++) {
+		//Rechte Seite wird zur next linken Seite (bleibt unveraendert)
 		memcpy(ln, r, 4);
-
+		//er auf 0 setzen.
 		memset(er, 0, 6);
 
+//************************************ Start der Feistelfunktion **************************************************
+		//Expansion von der rechten Seite, siehe Initial-Permutation im PRNG
 		for (i=0; i<48; i++) {
 			shift_size = E[i];
 			shift_byte = 0x80 >> ((shift_size - 1)%8);
@@ -249,24 +273,29 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 			er[i/8] |= (shift_byte >> i%8);
 		}
 
+		//Entscheided ob Encryption oder Decryption
 		if (mode == DECRYPTION_MODE) {
 			key_index = 17 - k;
 		} else {
 			key_index = k;
 		}
 
+		//XOR mit Round-Key.
 		for (i=0; i<6; i++) {
 			er[i] ^= key_sets[key_index].k[i];
 		}
 
 		unsigned char row, column;
 
-		for (i=0; i<4; i++) {
+		memset(ser, 0, 4);
+		/*for (i=0; i<4; i++) {
 			ser[i] = 0;
-		}
+		}*/
 
+		/*
 		// 0000 0000 0000 0000 0000 0000
 		// rccc crrc cccr rccc crrc cccr
+		*/
 
 		// Byte 1
 		row = 0;
@@ -348,10 +377,14 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 
 		ser[3] |= (unsigned char)S8[row*16+column];
 
+		memset(rn, 0, 4);
+		/*
 		for (i=0; i<4; i++) {
 			rn[i] = 0;
 		}
+		*/
 
+		//Permutation der rechten Seite, siehe Initial-Permutation von PRNG
 		for (i=0; i<32; i++) {
 			shift_size = P[i];
 			shift_byte = 0x80 >> ((shift_size - 1)%8);
@@ -360,23 +393,27 @@ void process_message(unsigned char* message_piece, unsigned char* processed_piec
 
 			rn[i/8] |= (shift_byte >> i%8);
 		}
+//************************************ Ende der Feistelfunktion **************************************************
 
+		//linke Seite mit Ergebnis der Feistelfunktion XOR.
 		for (i=0; i<4; i++) {
 			rn[i] ^= l[i];
 		}
 
+		//Vorbereitung für die nächste Runde.
 		for (i=0; i<4; i++) {
 			l[i] = ln[i];
 			r[i] = rn[i];
 		}
 	}
 
+	//Vorbereitung für die End-Permutation
 	unsigned char pre_end_permutation[8];
 	for (i=0; i<4; i++) {
 		pre_end_permutation[i] = r[i];
 		pre_end_permutation[4+i] = l[i];
 	}
-
+	//End-Permutation
 	for (i=0; i<64; i++) {
 		shift_size = LP[i];
 		shift_byte = 0x80 >> ((shift_size - 1)%8);

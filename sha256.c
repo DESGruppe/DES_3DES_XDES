@@ -28,6 +28,8 @@ static const WORD k[64] = {
 /*Ende der Variablen*/
 
 /*Function Definition*/
+
+//File gehoert in data umgewandelt, laenge laesst sich berechnen.
 void create_sha256(SHA256_CTX *ctx, const  BYTE data[], size_t len, BYTE buf[]){
 	sha256_init(&ctx);
 	sha256_update(&ctx, data, len);
