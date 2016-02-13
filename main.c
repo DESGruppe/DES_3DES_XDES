@@ -11,7 +11,7 @@
  * Created on 02. Jänner 2016, 16:41
  */
 
-#include <stdio.h>
+#include <stdio.h> // File
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -27,55 +27,82 @@
  #define DES_KEY_SIZE 8
 
 //Declaration der Functions
-void readkeyfile(int argc, char* argv[]);
-void openinputfile(int argc, char* argv[]);
-void openoutputfile();
+void read_key_file(int argc, char* argv[], int cip);
+void open_input_file(int argc, char* argv[]);
+void open_output_file();
+void generate_DES_key_set (short int process_mode);
 /*
  * 
  */
-
+unsigned char* symkey;
 int main(int argc, char* argv[]) {
+	printf("Start main!");
 
 	int i;
+	symkey = (unsigned char*) malloc(8*sizeof(char));
 
-	if (strcmp (argv[0], "des-enc") == 0){
-		if(argc == 3) //prueft ob genug Parameter vorhanden sind.
+	printf("Start der IF!");
+	if (strcmp (argv[1], "des-enc") == 0){
+		if(argc == 4) //prueft ob genug Parameter vorhanden sind.
 			{
-				readkeyfile(argc, argv);
-				openinputfile(argc, argv);
-				openoutputfile();
+				read_key_file(argc, argv, 2);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(ENCRYPTION_MODE);
+
 			}
-	} else if(strcmp (argv[0], "des3-enc") == 0){
-		if(argc == 5)
+	} else if(strcmp (argv[1], "des3-enc") == 0){
+		if(argc == 6)
 			{
-				readkeyfile(argc, argv);
-				openinputfile(argc, argv);
-				openoutputfile();
+				read_key_file(argc, argv, 2);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(ENCRYPTION_MODE);
+				read_key_file(argc, argv, 3);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(DECRYPTION_MODE);
+				read_key_file(argc, argv, 4);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(ENCRYPTION_MODE);
 			}
-	} else if(strcmp (argv[0], "desx-enc") == 0){
-		if(argc == 5)
+	} else if(strcmp (argv[1], "desx-enc") == 0){
+		if(argc == 6)
 			{
-				readkeyfile(argc, argv);
-				openinputfile(argc, argv);
-				openoutputfile();
+				//TO-DO
 			}
-	} else if(strcmp (argv[0], "des-dec") == 0){
+	} else if(strcmp (argv[1], "des-dec") == 0){
+		if(argc == 4)
+			{
+				read_key_file(argc, argv, 1);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(DECRYPTION_MODE);	
+			}
+	} else if(strcmp (argv[1], "des3-dec") == 0){
+		if(argc == 6)
+			{
+				read_key_file(argc, argv, 2);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(DECRYPTION_MODE);
+				read_key_file(argc, argv, 3);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(ENCRYPTION_MODE);
+				read_key_file(argc, argv, 4);
+				open_input_file(argc, argv);
+				open_output_file();
+				generate_DES_key_set(DECRYPTION_MODE);
+			}
+	} else if(strcmp (argv[1], "desx-dec") == 0){
+		if(argc == 6)
+			{
+				//TO-DO	
+			}
+	} else if(strcmp (argv[1], "ansix9-31-des3") == 0){
 		if(argc == 3)
-			{
-				
-			}
-	} else if(strcmp (argv[0], "des3-dec") == 0){
-		if(argc == 5)
-			{
-				
-			}
-	} else if(strcmp (argv[0], "desx-dec") == 0){
-		if(argc == 5)
-			{
-				
-			}
-	} else if(strcmp (argv[0], "ansix9-31-des3") == 0){
-		if(argc == 2)
 			{
 				//getcwd ruft den aktuellen Pfad der C-Datei ab.
 				//strcat verbindet den Output von getcwd mit \\symkex.txt.
@@ -95,7 +122,7 @@ int main(int argc, char* argv[]) {
 				srand(init_seed);
 
 
-				unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
+				//unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
 				generate_key(bitlen, symkey);
 				bytes_written = fwrite(symkey, 1, bitlen, key_file);
 				if(bytes_written != bitlen){
@@ -107,13 +134,23 @@ int main(int argc, char* argv[]) {
 				free(symkey);
 				fclose(key_file);
 			}
-	} else if(strcmp (argv[0], "sha-256") == 0){
+	} else if(strcmp (argv[1], "sha-256") == 0){
 		if(argc == 3)
 			{
-				
+				printf("Oh Yeah!");
+				unsigned char buf[SHA256_BLOCK_SIZE];
+				SHA256_CTX ctx;
+				fseek(input_file, 0L, SEEK_END);
+				size_t file_size = ftell(input_file);
+				fseek(input_file, 0L, SEEK_SET);
+				open_input_file(argc, argv);
+				sha256_init(&ctx);
+				sha256_update(&ctx, input_file, file_size);
+				sha256_final(&ctx, buf);
+				fprintf(stdout, buf);
 			}
 	} else {
-		printf("Wrong Command!\npossible commands:\n des-enc symkey input-file\n des3-enc symkey1 symkey2 symkey3 input-file\n desx-enc symkey1 symkey2 symkey3 input-file\n des-dec symkey input-file\n des3-dec symkey1 symkey2 symkey3 input-file\n desx-dec symkey1 symkey2 symkey3 input-file\n ansix9-31-des3 bitlength\n sha-256 input-file");
+		printf("Wrong Command!\npossible commands:\n des-enc symkey input-file\n des3-enc symkey1 symkey2 symkey3 input-file\n desx-enc symkey1 symkey2 symkey3 input-file\n des-dec symkey input-file\n des3-dec symkey1 symkey2 symkey3 input-file\n desx-dec symkey1 symkey2 symkey3 input-file\n ansix9-31-des3 bitlength\n sha-256 input-file\n");
 	}
 
 	return EXIT_SUCCESS;
@@ -121,40 +158,95 @@ int main(int argc, char* argv[]) {
 }
 
 //Liest die symkeys aus, egal ob des, des3 oder desx
-void readkeyfile(int argc, char *argv[]){
-	for( int i = 1; i <= argc-1; i++)
-	{
-		key_file =fopen(argv[i], "rb");
+void read_key_file(int argc, char *argv[],int cip){
+		key_file =fopen(argv[cip], "rb");
 		if(!key_file){
-			printf("Key-File konnte nicht geöffnet werden!");
+			printf("Key File konnte nicht geöffnet werden!");
 		}
 
-		short int bytes_read[3];
-		unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
-		bytes_read[i-1] = fread(symkey, sizeof(unsigned char), DES_KEY_SIZE,key_file);
-		if(bytes_read[i-1] != DES_KEY_SIZE) {
+		short int bytes_read;
+		//unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
+		bytes_read = fread(symkey, sizeof(unsigned char), DES_KEY_SIZE, key_file);
+		if(bytes_read != DES_KEY_SIZE) {
 			printf("Der Key hat nicht die benötigte Länge!");
 			fclose(key_file);
 		}
 		fclose(key_file);
 	}
-}
 
-void openinputfile(int argc, char *argv[]){
-	if(argc == 3 || argc == 5)
-	{
-		input_file = fopen(argv[argc], "rb");
+void open_input_file(int argc, char *argv[]){
+		input_file = fopen(argv[argc-1], "rb");
 		if (!input_file) {
 			printf("Input File konnte nicht ausgelesen werden!");
 		}
-	}
+		printf("open_if funkt!");
 }
 
-void openoutputfile(){
+void open_output_file(){
 	char pfad[256]; //Speichert den Pfad von der Output-Datei.
 	strcat(pfad,"\\output.tgp"); //Absolute Pfad zur Outputdatei.
 	output_file = fopen(pfad,"w+b");
 	if(!output_file){
-		printf("Output-File konnte nicht geöffnet werden!");
+		printf("Output File konnte nicht geöffnet werden!");
 	}
+}
+
+void generate_DES_key_set (short int process_mode){
+	short int bytes_written;
+	unsigned long block_count = 0, number_of_blocks, file_size;
+	unsigned char* data_block = (unsigned char*) malloc(8*sizeof(char));
+	unsigned char* processed_block = (unsigned char*) malloc(8*sizeof(char));
+	unsigned short int padding;
+	key_set* key_sets = (key_set*) malloc(17*sizeof(key_set));
+
+	generate_sub_keys(symkey,key_sets);
+
+	//Gibt die Anzahl der Blocks im File zurueck.
+	fseek(input_file, 0L, SEEK_END);
+	file_size = ftell(input_file);
+
+	fseek(input_file, 0L, SEEK_SET);
+	number_of_blocks = file_size/8 + ((file_size%8)?1:0);
+
+	//Start fuer das auslesen der Input file und das schreiben der Output file.
+	while(fread(data_block, 1, 8, input_file)){
+		block_count++;
+		if(block_count == number_of_blocks){
+			if(process_mode == ENCRYPTION_MODE){
+				padding = 8- file_size%8;
+				if(padding < 8){ //Befuellt leere Bloecke mit Padding.
+					memset((data_block +8 - padding), (unsigned char)padding, padding);
+				}
+
+				process_message(data_block, processed_block, key_sets, process_mode);
+				bytes_written = fwrite(processed_block, 1, 8, output_file);
+
+				if (padding == 8) { //Extra block fuer padding
+					memset(data_block, (unsigned char)padding, 8);
+					process_message(data_block, processed_block, key_sets, process_mode);
+					bytes_written = fwrite(processed_block, 1, 8, output_file);
+				}
+			} else if( process_mode == DECRYPTION_MODE) {
+					process_message(data_block, processed_block, key_sets, process_mode);
+					padding = processed_block[7];
+
+					if (padding < 8){
+						bytes_written= fwrite(processed_block, 1, 8 - padding, output_file);
+					}
+				} else{
+					printf("Falscher Modus angegeben!");
+				}
+			} else{
+				process_message(data_block, processed_block, key_sets, process_mode);
+				bytes_written = fwrite(processed_block, 1, 8, output_file);
+			}
+			memset(data_block, 0, 8);
+		}
+
+			//Speicher entleeren
+			free(symkey);
+			free(data_block);
+			free(processed_block);
+			fclose(input_file);
+			fclose(output_file);
 }

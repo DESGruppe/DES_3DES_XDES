@@ -30,14 +30,8 @@ static const WORD k[64] = {
 /*Function Definition*/
 
 //File gehoert in data umgewandelt, laenge laesst sich berechnen.
-void create_sha256(SHA256_CTX *ctx, const  BYTE data[], size_t len, BYTE buf[]){
-	sha256_init(ctx);
-	sha256_update(ctx, data, len);
-	sha256_final(ctx, buf);
-}
 
-
-void sha256_transformation(SHA256_CTX *ctx, const BYTE data[])
+void sha256_transformation(SHA256_CTX *ctx, const unsigned char data[])
 {
 	WORD a, b, c, d, e, f, g, h, i, j, t1, t2, m[64];
 
@@ -92,7 +86,7 @@ void sha256_init(SHA256_CTX *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
-void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len)
+void sha256_update(SHA256_CTX *ctx, const unsigned char data[], size_t len)
 {
 	WORD i;
 
@@ -107,7 +101,7 @@ void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len)
 	}
 }
 
-void sha256_final(SHA256_CTX *ctx, BYTE hash[])
+void sha256_final(SHA256_CTX *ctx, unsigned char hash[])
 {
 	WORD i;
 
@@ -139,7 +133,7 @@ void sha256_final(SHA256_CTX *ctx, BYTE hash[])
 	sha256_transformation(ctx, ctx->data);
 
 	//SHA benutzt big endian und diese Implementierung little endian deswegen
-	//werden alle Bytes umgedreht vorm Output.
+	//werden alle Bytes umgedreht vor dem Output.
 	for (i = 0; i < 4; ++i) {
 		hash[i]      = (ctx->state[0] >> (24 - i * 8)) & 0x000000ff;
 		hash[i + 4]  = (ctx->state[1] >> (24 - i * 8)) & 0x000000ff;
