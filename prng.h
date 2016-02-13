@@ -7,7 +7,7 @@ typedef struct {
 	unsigned char d[4];
 } key_set;
 
-void generate_key(unsigned char* key);
+void generate_key(int bitlen, unsigned char* key);
 void generate_sub_keys(unsigned char* main_key, key_set* key_sets);
 #endif
 

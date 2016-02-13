@@ -31,13 +31,13 @@ static const WORD k[64] = {
 
 //File gehoert in data umgewandelt, laenge laesst sich berechnen.
 void create_sha256(SHA256_CTX *ctx, const  BYTE data[], size_t len, BYTE buf[]){
-	sha256_init(&ctx);
-	sha256_update(&ctx, data, len);
-	sha256_final(&ctx, buf);
+	sha256_init(ctx);
+	sha256_update(ctx, data, len);
+	sha256_final(ctx, buf);
 }
 
 
-private void sha256_transformation(SHA256_CTX *ctx, const BYTE data[])
+void sha256_transformation(SHA256_CTX *ctx, const BYTE data[])
 {
 	WORD a, b, c, d, e, f, g, h, i, j, t1, t2, m[64];
 
@@ -78,7 +78,7 @@ private void sha256_transformation(SHA256_CTX *ctx, const BYTE data[])
 	ctx->state[7] += h;
 }
 
-private void sha256_init(SHA256_CTX *ctx)
+void sha256_init(SHA256_CTX *ctx)
 {
 	ctx->datalen = 0;
 	ctx->bitlen = 0;
@@ -92,7 +92,7 @@ private void sha256_init(SHA256_CTX *ctx)
 	ctx->state[7] = 0x5be0cd19;
 }
 
-private void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len)
+void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len)
 {
 	WORD i;
 
@@ -107,7 +107,7 @@ private void sha256_update(SHA256_CTX *ctx, const BYTE data[], size_t len)
 	}
 }
 
-private void sha256_final(SHA256_CTX *ctx, BYTE hash[])
+void sha256_final(SHA256_CTX *ctx, BYTE hash[])
 {
 	WORD i;
 

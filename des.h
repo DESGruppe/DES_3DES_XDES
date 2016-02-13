@@ -8,8 +8,9 @@ typedef struct {
 	unsigned char k[8];
 	unsigned char c[4];
 	unsigned char d[4];
-} key_set;
+} key_setting;
 
-void DES(unsigned char* message_piece, unsigned char* processed_piece, key_set* key_sets, int mode);
+void DES(unsigned char* message_piece, unsigned char* processed_piece, key_setting* key_sets, int mode);
+int rand(void);
 
 #endif

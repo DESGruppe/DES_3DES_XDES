@@ -13,141 +13,147 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include "des.h"
 #include "prng.h"
 #include "sha256.h"
 
+
+//Definition der file-Handler
+ static FILE *key_file, *input_file, *output_file;
+
+//DES-Key Länge
+ #define DES_KEY_SIZE 8
+
+//Declaration der Functions
+void readkeyfile(int argc, char* argv[]);
+void openinputfile(int argc, char* argv[]);
+void openoutputfile();
 /*
  * 
  */
-int main(int argc, char** argv) {
+
+int main(int argc, char* argv[]) {
 
 	int i;
 
-	switch(argv[0]){
-		case "des-enc": 
-			if(argv.length() = 3) //prueft ob genug Parameter vorhanden sind.
+	if (strcmp (argv[0], "des-enc") == 0){
+		if(argc == 3) //prueft ob genug Parameter vorhanden sind.
 			{
-				des()
+				readkeyfile(argc, argv);
+				openinputfile(argc, argv);
+				openoutputfile();
 			}
-			break;
-		case "des3-enc":
-			if(argv.length() = 5)
+	} else if(strcmp (argv[0], "des3-enc") == 0){
+		if(argc == 5)
 			{
+				readkeyfile(argc, argv);
+				openinputfile(argc, argv);
+				openoutputfile();
+			}
+	} else if(strcmp (argv[0], "desx-enc") == 0){
+		if(argc == 5)
+			{
+				readkeyfile(argc, argv);
+				openinputfile(argc, argv);
+				openoutputfile();
+			}
+	} else if(strcmp (argv[0], "des-dec") == 0){
+		if(argc == 3)
+			{
+				
+			}
+	} else if(strcmp (argv[0], "des3-dec") == 0){
+		if(argc == 5)
+			{
+				
+			}
+	} else if(strcmp (argv[0], "desx-dec") == 0){
+		if(argc == 5)
+			{
+				
+			}
+	} else if(strcmp (argv[0], "ansix9-31-des3") == 0){
+		if(argc == 2)
+			{
+				//getcwd ruft den aktuellen Pfad der C-Datei ab.
+				//strcat verbindet den Output von getcwd mit \\symkex.txt.
+				//Damit wird eine symkey.txt im Rootpfad der C-Datei erstellt.
+				char pfad[256]; //Hier wird der Programmpfad abgespeichert.
+				strcat(pfad,"\\symkey.txt");
+				key_file = fopen(pfad,"w+b");
+				if(!key_file){
+					printf("Key-File konnte nicht geöffnet werden!");
+					return 1;
+				}
+				short int bytes_written;
+				int bitlen = atoi(argv[1]);
 
+				//Verwendet den aktuellen TimeStamp als Init-Seed für den rand()-Befehl.
+				unsigned int init_seed = (unsigned int)time(NULL);
+				srand(init_seed);
+
+
+				unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
+				generate_key(bitlen, symkey);
+				bytes_written = fwrite(symkey, 1, bitlen, key_file);
+				if(bytes_written != bitlen){
+					printf("Fehler bei der Ausgabe des Keys in das Output-File!");
+					fclose(key_file);
+					free(symkey);
+					return 1;
+				}
+				free(symkey);
+				fclose(key_file);
 			}
-			break;
-		case "desx-enc": 
-			//TO-DO
-			break;
-		case "des-dec": 
-			if(argv.length() = 3)
+	} else if(strcmp (argv[0], "sha-256") == 0){
+		if(argc == 3)
 			{
 				
 			}
-			break;
-		case "des3-dec": 
-			if(argv.length() = 5)
-			{
-				
-			}
-			break;
-		case "desx-dec": 
-			//TO-DO
-			break;
-		case "ansix9-31-des3": 
-			if(argv.length() = 2)
-			{
-				
-			}
-			break;
-		case "sha-256": 
-			if(argv.length() = 3)
-			{
-				
-			}
-			break;
-		default:
-			put("Wrong Command!\npossible commands:\n des-enc, des3-enc, desx-enc, des-dec, des3-dec, desx-dec, ansix9-31-des3, sha-256")
-		break;
+	} else {
+		printf("Wrong Command!\npossible commands:\n des-enc symkey input-file\n des3-enc symkey1 symkey2 symkey3 input-file\n desx-enc symkey1 symkey2 symkey3 input-file\n des-dec symkey input-file\n des3-dec symkey1 symkey2 symkey3 input-file\n desx-dec symkey1 symkey2 symkey3 input-file\n ansix9-31-des3 bitlength\n sha-256 input-file");
 	}
-
 
 	return EXIT_SUCCESS;
 
-
-
-
-/*
-	//Hilfsvariable für den User-Input
-    char input;
-    bool isRunning = true;
-    char[] parameter;
-
-    while(isRunning==true)
-    {
-        //Bereinigt die Console
-        system("clear");        //Fuer Unix-based OS, cls für Windows-based
-
-        //KeyBoard-Buffer bereinigen
-        fflush(stdin);
-        //Auflistung der Möglichkeiten
-        puts("\n[des-enc symkey file] DES-Encryption"
-             "\n[des3-enc symkey1 symkey2 symkey3 file] 3DES-Encryption"
-             "\n[desx-enc ? file] DESX-Encryption"
-             "\n[des-dec symkey file] DES-Decryption"
-             "\n[des3-dec symkey1 symkey2 symkey3 file] 3DES-Decryption"
-             "\n[desx-dec ? file] DESX-Decryption"
-             "\n[ansix9-31-des3 bitlength] PRNG aufrufen"
-             "\n[sha-256 file] SHA256 Hash generieren"
-             //"\n[help] Beschreibung zu den einzelnen Operationen."
-             "\n[x]Exit");
-        //Input einlesen
-        while( input = getchar()) != ' ')
-        //input = getchar();
-
-        switch(option)
-        {
-            case 'des-enc':
-            		 parameter = Parameter_einlesen();
-            		 des()
-                     break;
-            case 'des3-enc':
-                     //TO DO CODE
-                     break;
-            case 'desx-enc':
-                     //TO DO CODE
-                     break;
-            case 'des-dec':
-                     //TO DO CODE
-                     break;
-            case 'des3-dec':
-                     //TO DO CODE
-                     break;
-            case 'desx-dec':
-                     //TO DO CODE
-                     break;
-            case 'ansix9-31-des3':
-                     //TO DO CODE
-                     break;
-            case 'sha-256':
-                     //TO DO CODE
-                     break;
-            case 'help':
-                     //TO DO CODE
-                     break;
-            //...
-            case 'x':
-                     //Exits the system
-                     isRunning = false;
-                     return 0;
-            default :
-                     //User enters wrong input
-                     puts("falscher Input!")
-                     break;
-        }
-    }
-    return 0;
-*/
 }
 
+void readkeyfile(int argc, char *argv[]){
+	for( int i = 1; i <= argc-1; i++)
+	{
+		key_file =fopen(argv[i], "rb");
+		if(!key_file){
+			printf("Key-File konnte nicht geöffnet werden!");
+		}
+
+		short int bytes_read[3];
+		unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
+		bytes_read[i-1] = fread(symkey, sizeof(unsigned char), DES_KEY_SIZE,key_file);
+		if(bytes_read[i-1] != DES_KEY_SIZE) {
+			printf("Der Key hat nicht die benötigte Länge!");
+			fclose(key_file);
+		}
+		fclose(key_file);
+	}
+}
+
+void openinputfile(int argc, char *argv[]){
+	if(argc == 3 || argc == 5)
+	{
+		input_file = fopen(argv[argc], "rb");
+		if (!input_file) {
+			printf("Input File konnte nicht ausgelesen werden!");
+		}
+	}
+}
+
+void openoutputfile(){
+	char pfad[256]; //Speichert den Pfad von der Output-Datei.
+	strcat(pfad,"\\output.tgp"); //Absolute Pfad zur Outputdatei.
+	output_file = fopen(pfad,"w+b");
+	if(!output_file){
+		printf("Output-File konnte nicht geöffnet werden!");
+	}
+}
