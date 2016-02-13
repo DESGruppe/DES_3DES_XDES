@@ -120,6 +120,7 @@ int main(int argc, char* argv[]) {
 
 }
 
+//Liest die symkeys aus, egal ob des, des3 oder desx
 void readkeyfile(int argc, char *argv[]){
 	for( int i = 1; i <= argc-1; i++)
 	{
