@@ -1,4 +1,5 @@
 #include "prng.h"
+#include <stdlib.h>
 //Initial Key Permutation
 int PC1[] = {57, 49,  41, 33,  25,  17,  9,
 			  1, 58,  50, 42,  34,  26, 18,

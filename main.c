@@ -35,13 +35,12 @@ void generate_DES_key_set (short int process_mode);
  * 
  */
 unsigned char* symkey;
-int main(int argc, char* argv[]) {
-	printf("Start main!");
 
-	int i;
+int main(int argc, char* argv[]) {
+	
 	symkey = (unsigned char*) malloc(8*sizeof(char));
 
-	printf("Start der IF!");
+	//Zu jeden DES gehoert noch eine Base64 codierung.
 	if (strcmp (argv[1], "des-enc") == 0){
 		if(argc == 4) //prueft ob genug Parameter vorhanden sind.
 			{
@@ -101,30 +100,23 @@ int main(int argc, char* argv[]) {
 			{
 				//TO-DO	
 			}
-	} else if(strcmp (argv[1], "ansix9-31-des3") == 0){
+
+	} else if(strcmp (argv[1], "ansix9-31-des3") == 0){ //Base64 Codierung gehoert noch implementiert.
 		if(argc == 3)
 			{
-				//getcwd ruft den aktuellen Pfad der C-Datei ab.
-				//strcat verbindet den Output von getcwd mit \\symkex.txt.
-				//Damit wird eine symkey.txt im Rootpfad der C-Datei erstellt.
-				char pfad[256]; //Hier wird der Programmpfad abgespeichert.
-				strcat(pfad,"\\symkey.txt");
-				key_file = fopen(pfad,"w+b");
+				key_file = fopen("symkey","w+b");
 				if(!key_file){
 					printf("Key-File konnte nicht geöffnet werden!");
 					return 1;
 				}
 				short int bytes_written;
-				int bitlen = atoi(argv[1]);
-
+				int bitlen = atoi(argv[2]);
+				printf("%i", bitlen);
 				//Verwendet den aktuellen TimeStamp als Init-Seed für den rand()-Befehl.
-				unsigned int init_seed = (unsigned int)time(NULL);
-				srand(init_seed);
+				srand(time(NULL));
 
-
-				//unsigned char* symkey = (unsigned char*) malloc(8*sizeof(char));
 				generate_key(bitlen, symkey);
-				bytes_written = fwrite(symkey, 1, bitlen, key_file);
+				bytes_written = fwrite(symkey, sizeof(char), bitlen, key_file);
 				if(bytes_written != bitlen){
 					printf("Fehler bei der Ausgabe des Keys in das Output-File!");
 					fclose(key_file);
@@ -137,17 +129,23 @@ int main(int argc, char* argv[]) {
 	} else if(strcmp (argv[1], "sha-256") == 0){
 		if(argc == 3)
 			{
-				printf("Oh Yeah!");
 				unsigned char buf[SHA256_BLOCK_SIZE];
+				unsigned char* file;
 				SHA256_CTX ctx;
+				open_input_file(argc, argv);
 				fseek(input_file, 0L, SEEK_END);
 				size_t file_size = ftell(input_file);
 				fseek(input_file, 0L, SEEK_SET);
-				open_input_file(argc, argv);
+				file = malloc(sizeof(unsigned char)*file_size);
+				fread(file, sizeof(unsigned char), file_size, input_file);
 				sha256_init(&ctx);
-				sha256_update(&ctx, input_file, file_size);
+				sha256_update(&ctx, file, file_size);
 				sha256_final(&ctx, buf);
-				fprintf(stdout, buf);
+				for(int j=0;j<sizeof(buf);j++){
+					fprintf(stdout, "%.2x" , buf[j]);
+				}
+				fprintf(stdout, "\n");
+				fclose(input_file);
 			}
 	} else {
 		printf("Wrong Command!\npossible commands:\n des-enc symkey input-file\n des3-enc symkey1 symkey2 symkey3 input-file\n desx-enc symkey1 symkey2 symkey3 input-file\n des-dec symkey input-file\n des3-dec symkey1 symkey2 symkey3 input-file\n desx-dec symkey1 symkey2 symkey3 input-file\n ansix9-31-des3 bitlength\n sha-256 input-file\n");
@@ -179,13 +177,10 @@ void open_input_file(int argc, char *argv[]){
 		if (!input_file) {
 			printf("Input File konnte nicht ausgelesen werden!");
 		}
-		printf("open_if funkt!");
 }
 
 void open_output_file(){
-	char pfad[256]; //Speichert den Pfad von der Output-Datei.
-	strcat(pfad,"\\output.tgp"); //Absolute Pfad zur Outputdatei.
-	output_file = fopen(pfad,"w+b");
+	output_file = fopen("output.tgp","w+b");
 	if(!output_file){
 		printf("Output File konnte nicht geöffnet werden!");
 	}

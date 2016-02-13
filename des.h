@@ -6,6 +6,5 @@
 #define DECRYPTION_MODE 0
 
 void process_message(unsigned char* message_piece, unsigned char* processed_piece, key_set* key_sets, int mode);
-int rand(void);
 
 #endif
