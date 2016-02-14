@@ -57,14 +57,25 @@ int main(int argc, char* argv[]) {
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(ENCRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
+				printf("Encrypt...\n");
+
 				read_key_file(argc, argv, 3);
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(DECRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
+				printf("Decrypt...\n");
+				
 				read_key_file(argc, argv, 4);
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(ENCRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
+				printf("Encrypt...\n");
 			}
 	} else if(strcmp (argv[1], "desx-enc") == 0){
 		if(argc == 6)
@@ -74,7 +85,7 @@ int main(int argc, char* argv[]) {
 	} else if(strcmp (argv[1], "des-dec") == 0){
 		if(argc == 4)
 			{
-				read_key_file(argc, argv, 1);
+				read_key_file(argc, argv, 2);
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(DECRYPTION_MODE);	
@@ -86,14 +97,20 @@ int main(int argc, char* argv[]) {
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(DECRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
 				read_key_file(argc, argv, 3);
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(ENCRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
 				read_key_file(argc, argv, 4);
 				open_input_file(argc, argv);
 				open_output_file();
 				generate_DES_key_set(DECRYPTION_MODE);
+				fclose(input_file);
+				fclose(output_file);
 			}
 	} else if(strcmp (argv[1], "desx-dec") == 0){
 		if(argc == 6)
