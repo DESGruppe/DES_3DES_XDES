@@ -84,7 +84,6 @@ int P[] =    {16,  7, 20, 21,
 			  19, 13, 30,  6,
 			  22, 11,  4, 25};
 
-
 void process_message(unsigned char* message_piece, unsigned char* processed_piece, key_set* key_sets, int mode){
 	int i, k;
 	int shift_size;
