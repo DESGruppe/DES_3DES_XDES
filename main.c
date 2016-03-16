@@ -63,7 +63,7 @@ int main(int argc, char* argv[]) {
 				fseek(input_file, 0L, SEEK_END);
 				size_t file_size = ftell(input_file);
 				fseek(input_file, 0L, SEEK_SET);
-				//Die benötigte Größe von tmp setzen. +2 wegen \0.
+				//Die benötigte Größe von tmp setzen. +2 wegen \0 und Zeilenumbruch.
 				tmp = malloc(file_size+2);
 				//Liest die Input-Datei aus und speichert diese in tmp ab.
 				fread(tmp, sizeof(unsigned char), file_size, input_file);
@@ -139,6 +139,7 @@ int main(int argc, char* argv[]) {
 
 				fprintf(output_file, "%s", help);
 				printf("%s\n",help);
+
 				free(tmp);
 				free(help);
 				fclose(input_file);
@@ -182,7 +183,7 @@ int main(int argc, char* argv[]) {
 				fseek(input_file, 0L, SEEK_END);
 				file_size = ftell(input_file);
 				fseek(input_file, 0L, SEEK_SET);
-				//Die benötigte Größe von tmp setzen. +2 wegen \0.
+				//Die benötigte Größe von tmp setzen. +2 wegen \0 und Zeilenumbruch.
 				tmp = malloc(file_size);
 				//Liest die Input-Datei aus und speichert diese in tmp ab.
 				fread(tmp, sizeof(unsigned char), file_size, input_file);
@@ -297,7 +298,7 @@ int main(int argc, char* argv[]) {
 				fclose(input_file);
 				fclose(output_file);
 
-				//DES-Encryption
+				//DES-Decryption
 				read_key_file(argc, argv, 3);
 				open_input_file(argv[argc-1]);
 				open_output_file("decryptx.tgp");
@@ -336,7 +337,7 @@ int main(int argc, char* argv[]) {
 					return 1;
 				}
 				//atoi wandelt String in Int um. (verwendet nicht den Hex-Wert des Strings)
-				size_t bitlen = atoi(argv[2]);
+				size_t bitlen = atoi(argv[2])+1;
 
 				//Verwendet den aktuellen TimeStamp als Init-Seed für den rand()-Befehl.
 				srand(time(NULL));
@@ -484,8 +485,8 @@ void generate_DES_key_set (short int process_mode){
 	//Gibt die Anzahl der Blocks im File zurueck.
 	fseek(input_file, 0L, SEEK_END);
 	file_size = ftell(input_file);
-
 	fseek(input_file, 0L, SEEK_SET);
+	
 	//Unterteilung in 8 Bit Blöcken.
 	number_of_blocks = file_size/8 + ((file_size%8)?1:0);
 
